@@ -43,7 +43,7 @@ app.controller("AddCtrl", function($scope, Items) {
 });
 
 app.controller("ProfileCtrl", function($scope, Auth) {
-    var usersRef = new Firebase("https://foodsta.firebaseio.com"); 
+    var usersRef = new Firebase("https://foodsta.firebaseio.com");
     var isNewUser = true;
 
     $scope.login = function() {
@@ -76,20 +76,42 @@ app.controller("ProfileCtrl", function($scope, Auth) {
 });
 
 app.config(function($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.otherwise('/list')
+    $urlRouterProvider.otherwise('tab/home')
     $stateProvider
-    .state('list', {
-        url: '/list',
-        templateUrl: 'list.html',
-        controller: 'ListCtrl'
+
+    // setup an abstract state for the tabs directive
+    .state('tab', {
+        url: '/tab',
+        abstract: true,
+        templateUrl: 'templates/tabs.html'
     })
-    .state('add', {
+    .state('tab.home', {
+        url: '/home',
+        views: {
+            'tab-home': {
+                templateUrl: 'templates/list.html',
+                controller: 'ListCtrl',
+                authRequired: true
+            }
+        }
+    })
+    .state('tab.add', {
         url: '/add',
-        templateUrl: 'add.html',
-        controller: 'AddCtrl'
+        views: {
+            'tab-add': {
+                templateUrl: 'templates/add.html',
+                controller: 'AddCtrl',
+                authRequired: true
+            }
+        }
     })
-    .state('account', {
-        url: '/account',
-        templateUrl: 'account.html'
+    .state('tab.profile', {
+        url: '/profile',
+        views: {
+            'tab-profile': {
+                templateUrl: 'templates/profile.html',
+                authRequired: true
+            }
+        }
     })
-})
+});

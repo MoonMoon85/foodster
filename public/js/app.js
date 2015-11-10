@@ -11,7 +11,7 @@ app.factory("Items", function($firebaseArray) {
 })
 
 app.factory("Auth", function($firebaseAuth) {
-    var usersRef = new Firebase("https://foodsta.firebaseio.com/users");
+    var usersRef = new Firebase("https://foodsta.firebaseio.com/");
     return $firebaseAuth(usersRef);
 })
 
@@ -43,6 +43,8 @@ app.controller("AddCtrl", function($scope, Items) {
 });
 
 app.controller("ProfileCtrl", function($scope, Auth) {
+    var usersRef = new Firebase("https://foodsta.firebaseio.com");
+    var isNewUser = true;
 
     $scope.login = function() {
         Auth.$authWithOAuthRedirect("facebook");
@@ -53,28 +55,63 @@ app.controller("ProfileCtrl", function($scope, Auth) {
     };
 
     Auth.$onAuth(function(authData) {
-
+        if (authData && isNewUser) {
+            // save the user's profile into the database so we can list users,
+            // use them in Security and Firebase Rules, and show profiles
+            usersRef.child("users").child(authData.uid).set({
+                provider: authData.provider,
+                name: getName(authData)
+            });
+        }
         $scope.authData = authData; // This will display the user's name in our view
-
     });
 
+    // find a suitable name based on the meta info given by facebook
+    function getName(authData) {
+        switch(authData.provider) {
+            case 'facebook':
+                return authData.facebook.displayName;
+        }
+    }
 });
 
 app.config(function($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.otherwise('/list')
+    $urlRouterProvider.otherwise('tab/home')
     $stateProvider
-    .state('list', {
-        url: '/list',
-        templateUrl: 'list.html',
-        controller: 'ListCtrl'
+
+    // setup an abstract state for the tabs directive
+    .state('tab', {
+        url: '/tab',
+        abstract: true,
+        templateUrl: 'templates/tabs.html'
     })
-    .state('add', {
+    .state('tab.home', {
+        url: '/home',
+        views: {
+            'tab-home': {
+                templateUrl: 'templates/list.html',
+                controller: 'ListCtrl',
+                authRequired: true
+            }
+        }
+    })
+    .state('tab.add', {
         url: '/add',
-        templateUrl: 'add.html',
-        controller: 'AddCtrl'
+        views: {
+            'tab-add': {
+                templateUrl: 'templates/add.html',
+                controller: 'AddCtrl',
+                authRequired: true
+            }
+        }
     })
-    .state('account', {
-        url: '/account',
-        templateUrl: 'account.html'
+    .state('tab.profile', {
+        url: '/profile',
+        views: {
+            'tab-profile': {
+                templateUrl: 'templates/profile.html',
+                authRequired: true
+            }
+        }
     })
-})
+});

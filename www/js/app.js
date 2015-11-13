@@ -17,33 +17,36 @@ app.factory("Auth", function($firebaseAuth) {
 
 app.controller("ListCtrl", function($scope, $ionicListDelegate, Items) {
 
-    $scope.items = Items;
 
-    $scope.purchaseItem = function(item) {
-        var itemRef = new Firebase("https://foodsta.firebaseio.com/items/" + item.$id);
-        itemRef.child('status').set('purchased');
-        $ionicListDelegate.closeOptionButtons();
-    };
+
+    // $scope.items = Items;
+
+    // $scope.purchaseItem = function(item) {
+    //     var itemRef = new Firebase("https://foodsta.firebaseio.com/items/" + item.$id);
+    //     itemRef.child('status').set('purchased');
+    //     $ionicListDelegate.closeOptionButtons();
+    // };
 
 });
 
 app.controller("AddCtrl", function($scope, Items) {
 
-    $scope.items = Items;
+    // $scope.items = Items;
 
-    $scope.addItem = function() {
-        var name = $('[data-action=nameInput]').val();
-        if (name) {
-            $scope.items.$add({
-                "name": name
-            });
-        }
-    };
+    // $scope.addItem = function() {
+    //     var name = $('[data-action=nameInput]').val();
+    //     if (name) {
+    //         $scope.items.$add({
+    //             "name": name
+    //         });
+    //     }
+    // };
 
 });
 
-app.controller("ProfileCtrl", function($scope, Auth) {
+app.controller("ProfileCtrl", function($scope, Auth, Items) {
     var usersRef = new Firebase("https://foodsta.firebaseio.com");
+    var authData = usersRef.getAuth();
     var isNewUser = true;
 
     $scope.login = function() {
@@ -73,6 +76,19 @@ app.controller("ProfileCtrl", function($scope, Auth) {
                 return authData.facebook.displayName;
         }
     }
+
+    // Add item to firebase and add reference to the user
+    $scope.items = Items;
+    $scope.addItem = function() {
+        var authData = usersRef.getAuth();
+        var name = $('[data-action=nameInput]').val();
+        if (name) {
+            $scope.items.$add({
+                "name": name,
+                "by": authData.uid
+            });
+        }
+    };
 });
 
 app.config(function($stateProvider, $urlRouterProvider) {

@@ -17,15 +17,13 @@ app.factory("Auth", function($firebaseAuth) {
 
 app.controller("ListCtrl", function($scope, $ionicListDelegate, Items) {
 
+    $scope.items = Items;
 
-
-    // $scope.items = Items;
-
-    // $scope.purchaseItem = function(item) {
-    //     var itemRef = new Firebase("https://foodsta.firebaseio.com/items/" + item.$id);
-    //     itemRef.child('status').set('purchased');
-    //     $ionicListDelegate.closeOptionButtons();
-    // };
+    $scope.purchaseItem = function(item) {
+        var itemRef = new Firebase("https://foodsta.firebaseio.com/items/" + item.$id);
+        itemRef.child('status').set('purchased');
+        $ionicListDelegate.closeOptionButtons();
+    };
 
 });
 
@@ -44,13 +42,13 @@ app.controller("AddCtrl", function($scope, Items) {
 
 });
 
-app.controller("ProfileCtrl", function($scope, Auth, Items) {
+app.controller("ProfileCtrl", function($scope, $state, Auth) {
     var usersRef = new Firebase("https://foodsta.firebaseio.com");
     var authData = usersRef.getAuth();
     var isNewUser = true;
 
     $scope.login = function() {
-        Auth.$authWithOAuthRedirect("facebook");
+        Auth.$authWithOAuthPopup("facebook");
     };
 
     $scope.logout = function() {
@@ -66,6 +64,12 @@ app.controller("ProfileCtrl", function($scope, Auth, Items) {
                 name: getName(authData)
             });
         }
+        if (authData === null) {
+            console.log("Not logged in yet");
+        } else {
+            console.log("Logged in as", authData.uid);
+            $state.go($state.current, {}, {reload: true});
+        }
         $scope.authData = authData; // This will display the user's name in our view
     });
 
@@ -78,7 +82,6 @@ app.controller("ProfileCtrl", function($scope, Auth, Items) {
     }
 
     // Add item to firebase and add reference to the user
-    $scope.items = Items;
     $scope.addItem = function() {
         var authData = usersRef.getAuth();
         var name = $('[data-action=nameInput]').val();

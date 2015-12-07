@@ -27,21 +27,6 @@ app.controller("ListCtrl", function($scope, $ionicListDelegate, Items) {
 
 });
 
-app.controller("AddCtrl", function($scope, Items) {
-
-    // $scope.items = Items;
-
-    // $scope.addItem = function() {
-    //     var name = $('[data-action=nameInput]').val();
-    //     if (name) {
-    //         $scope.items.$add({
-    //             "name": name
-    //         });
-    //     }
-    // };
-
-});
-
 app.controller("ProfileCtrl", function($scope, $state, Auth) {
     var usersRef = new Firebase("https://foodsta.firebaseio.com");
     var authData = usersRef.getAuth();
@@ -68,7 +53,7 @@ app.controller("ProfileCtrl", function($scope, $state, Auth) {
             console.log("Not logged in yet");
         } else {
             console.log("Logged in as", authData.uid);
-            $state.go($state.current, {}, {reload: true});
+
         }
         $scope.authData = authData; // This will display the user's name in our view
     });
